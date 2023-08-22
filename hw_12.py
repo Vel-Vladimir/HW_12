@@ -106,8 +106,21 @@ class AddressBook(UserDict):
 
     def add_record(self, record: Record) -> None:
         self.data[record.name.value] = record
-        with open(FILE_DATA, "wb") as fh:
+        self.save_adress_book_to_file()
+
+
+    def save_adress_book_to_file(self, filename=FILE_DATA):
+        with open(filename, "wb") as fh:
             pickle.dump(self.data, fh)
+
+    @classmethod
+    def read_adress_book_from_file(cls, filename=FILE_DATA):
+        try:
+            with open(filename, "rb") as fh:
+                load_dict = pickle.load(fh)
+                return cls(load_dict)
+        except FileNotFoundError:
+            return cls()
 
     def iterator(self, number_records):
         return AddressBookIterator(number_records, self)
@@ -152,28 +165,29 @@ class AddressBookIterator:
 
 
 def main(ab: AddressBook):
-    # name = Name('Bill')
-    # phone = Phone('1234567890')
-    # day = Birthday("19.08")
-    # rec1 = Record(name, phone, day)
-    #
-    # name2 = Name('Ted')
-    # phone2 = Phone('4444444444')
-    # rec2 = Record(name2, phone2)
-    #
-    # name3 = Name('Bob')
-    # phone3 = Phone('55555555')
-    # rec3 = Record(name3, phone3)
-    #
-    # name4 = Name('Clod')
-    # phone4 = Phone('6666666')
-    # rec4 = Record(name4, phone4)
-    # ab.add_record(rec1)
-    # ab.add_record(rec2)
-    # ab.add_record(rec3)
-    # ab.add_record(rec4)
-    # print(rec1.days_to_birthday)
-    print(ab)
+    name = Name('Bill')
+    phone = Phone('1234567890')
+    day = Birthday("19.08")
+    rec1 = Record(name, phone, day)
+    rec1.add_phone(Phone('0671232587'))
+
+    name2 = Name('Ted')
+    phone2 = Phone('4444444444')
+    rec2 = Record(name2, phone2)
+
+    name3 = Name('Bob')
+    phone3 = Phone('55555555')
+    rec3 = Record(name3, phone3)
+
+    name4 = Name('Clod')
+    phone4 = Phone('6666666')
+    rec4 = Record(name4, phone4)
+    ab.add_record(rec1)
+    ab.add_record(rec2)
+    ab.add_record(rec3)
+    ab.add_record(rec4)
+    print(rec1.days_to_birthday)
+
     iter = ab.iterator(2)
     while True:
         try:
@@ -181,8 +195,7 @@ def main(ab: AddressBook):
         except StopIteration:
             break
 
-    result = ab.find_contact("4")
-    print('-')
+    result = ab.find_contact("067")
     print("Search result:", result, sep='\n')
 
     assert isinstance(ab['Bill'], Record)
@@ -191,21 +204,7 @@ def main(ab: AddressBook):
     assert isinstance(ab['Bill'].phones[0], Phone)
     assert ab['Bill'].phones[0].value == '1234567890'
 
-def add_more_records(ab: AddressBook):
-    name = Name('Gosha')
-    phone = Phone('0503615749')
-    day = Birthday("24.07")
-    rec1 = Record(name, phone, day)
-    ab.add_record(rec1)
 
 if __name__ == '__main__':
-    try:
-        with open(FILE_DATA, "rb") as fh:
-            load_dict = pickle.load(fh)
-            ab = AddressBook(load_dict)
-    except FileNotFoundError:
-        ab = AddressBook()
-    for key in ab:
-        print(ab[key])
+    ab = AddressBook.read_adress_book_from_file()
     main(ab)
-    # add_records(ab)
